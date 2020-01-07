@@ -1,0 +1,29 @@
+---
+
+- name: JSON query
+  block:
+    - name: Create json query
+      set_fact:
+        query: "[*].title"
+    
+    - name: Get extractor titles
+      set_fact:
+        extractor_titles: "{{ (graylog_running_extractors.json.extractors | json_query(query)) }}"
+
+- name: Create the given extractors
+  when: extractor.title not in extractor_titles
+  loop: "{{ input.extractors }}"
+  loop_control:
+    loop_var: extractor
+  uri:
+    url: "{{ graylog_api }}/system/inputs/{{ input_id }}/extractors"
+    method: POST
+    user: "{{ graylog_login }}"
+    password: "{{ graylog_password }}"
+    body_format: json
+    body: "{{ extractor | to_json }}"
+    validate_certs: no
+    status_code:
+        - 201
+    headers:
+        X-Requested-By: ansible

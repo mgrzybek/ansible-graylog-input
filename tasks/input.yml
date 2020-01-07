@@ -1,0 +1,51 @@
+---
+
+- name: Create the given inputs
+  when: "input.input.title not in graylog_input_titles"
+  block:
+    - name: Create the input
+      register: create_input_result
+      uri:
+        url: "{{ graylog_api }}/system/inputs"
+        method: POST
+        user: "{{ graylog_login }}"
+        password: "{{ graylog_password }}"
+        body_format: json
+        body: "{{ input.input | to_json }}"
+        validate_certs: no
+        status_code:
+            - 201
+        headers:
+            X-Requested-By: ansible
+
+    - name: Refresh the inputs inventory
+      include_tasks: pre_install.yml
+
+- name: JSON query
+  block:
+    - name: Create json query
+      set_fact:
+        query: "[?title=='{{ input.input.title }}'].id"
+
+    - name: Get input id
+      set_fact:
+        input_id: "{{ (graylog_running_inputs.json.inputs | json_query(query))[0] }}" 
+
+- name: Get already configured extractors
+  register: graylog_running_extractors
+  until: graylog_running_extractors.json
+  retries: 10
+  delay: 30
+  uri:
+    url: "{{ graylog_api }}/system/inputs/{{ input_id }}/extractors"
+    method: GET
+    user: "{{ graylog_login }}"
+    password: "{{ graylog_password }}"
+    validate_certs: no
+    timeout: 60
+    #status_code:
+    #    - 200
+    headers:
+        X-Requested-By: ansible
+
+- include_tasks: extractor.yml

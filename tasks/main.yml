@@ -1,0 +1,10 @@
+---
+
+# TODO: check input conf
+
+- import_tasks: pre_install.yml
+
+- include_tasks: input.yml
+  loop: "{{ graylog_inputs }}"
+  loop_control:
+    loop_var: input

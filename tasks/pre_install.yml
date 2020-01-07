@@ -1,0 +1,22 @@
+---
+ 
+- name: Get already configured inputs
+  register: graylog_running_inputs
+  until: graylog_running_inputs.json
+  retries: 10
+  delay: 30
+  uri:
+    url: "{{ graylog_api }}/system/inputs"
+    method: GET
+    user: "{{ graylog_login }}"
+    password: "{{ graylog_password }}"
+    validate_certs: no
+    timeout: 60
+    #status_code:
+    #    - 200
+    headers:
+        X-Requested-By: ansible
+
+- name: Generate input's name
+  set_fact:
+    graylog_input_titles: "{{ graylog_running_inputs.json.inputs | json_query('[*].title') }}"
