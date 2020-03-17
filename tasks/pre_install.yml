@@ -1,5 +1,5 @@
 ---
- 
+
 - name: Get already configured inputs
   register: graylog_running_inputs
   until: graylog_running_inputs.json
