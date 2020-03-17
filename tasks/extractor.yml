@@ -5,7 +5,7 @@
     - name: Create json query
       set_fact:
         query: "[*].title"
-    
+
     - name: Get extractor titles
       set_fact:
         extractor_titles: "{{ (graylog_running_extractors.json.extractors | json_query(query)) }}"

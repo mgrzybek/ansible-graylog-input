@@ -29,7 +29,7 @@
 
     - name: Get input id
       set_fact:
-        input_id: "{{ (graylog_running_inputs.json.inputs | json_query(query))[0] }}" 
+        input_id: "{{ (graylog_running_inputs.json.inputs | json_query(query))[0] }}"
 
 - name: Get already configured extractors
   register: graylog_running_extractors
